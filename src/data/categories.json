@@ -2,43 +2,85 @@
   {
     "slug": "tools",
     "label": "Tools",
-    "count": 30,
+    "count": 595,
     "description": "Utility and productivity apps"
   },
   {
     "slug": "media",
     "label": "Media",
-    "count": 3,
+    "count": 149,
     "description": "Media players, music, and video apps"
+  },
+  {
+    "slug": "security",
+    "label": "Security",
+    "count": 70,
+    "description": "Password managers and security tools"
+  },
+  {
+    "slug": "customization",
+    "label": "Customization",
+    "count": 48,
+    "description": "Launchers, themes, and customization"
   },
   {
     "slug": "communication",
     "label": "Communication",
-    "count": 2,
+    "count": 40,
     "description": "Messaging, email, and social apps"
   },
   {
     "slug": "navigation",
     "label": "Navigation",
-    "count": 1,
+    "count": 36,
     "description": "Maps and navigation apps"
   },
   {
-    "slug": "security",
-    "label": "Security",
-    "count": 1,
-    "description": "Password managers and security tools"
+    "slug": "reading",
+    "label": "Reading",
+    "count": 32,
+    "description": "E-book readers, RSS, and news apps"
+  },
+  {
+    "slug": "games",
+    "label": "Games",
+    "count": 26,
+    "description": "Games and entertainment"
+  },
+  {
+    "slug": "browser",
+    "label": "Browser",
+    "count": 9,
+    "description": "Web browsers and related apps"
+  },
+  {
+    "slug": "finance",
+    "label": "Finance",
+    "count": 9,
+    "description": "Finance and budgeting apps"
   },
   {
     "slug": "education",
     "label": "Education",
-    "count": 1,
+    "count": 7,
     "description": "Learning and education apps"
   },
   {
     "slug": "weather",
     "label": "Weather",
-    "count": 1,
+    "count": 7,
     "description": "Weather forecast apps"
+  },
+  {
+    "slug": "development",
+    "label": "Development",
+    "count": 7,
+    "description": "Developer tools and IDEs"
+  },
+  {
+    "slug": "health",
+    "label": "Health",
+    "count": 3,
+    "description": "Health and fitness apps"
   }
 ]
