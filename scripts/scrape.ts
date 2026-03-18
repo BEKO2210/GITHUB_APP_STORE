@@ -1,10 +1,12 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { octokit, ghRequest } from './utils/github-api.js';
 import { slugify } from './utils/slug.js';
 import type { AppEntry, StoreMeta, CategoryEntry } from '../src/types/app.js';
 
-const DATA_DIR = join(import.meta.dirname, '..', 'src', 'data');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = join(__dirname, '..', 'src', 'data');
 const APPS_FILE = join(DATA_DIR, 'apps.json');
 const META_FILE = join(DATA_DIR, 'meta.json');
 const CATS_FILE = join(DATA_DIR, 'categories.json');

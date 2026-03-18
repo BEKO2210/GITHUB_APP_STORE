@@ -27,7 +27,7 @@ const ogImageUrl = ogImage ?? `${siteUrl}${base}/icons/icon-512.png`;
     <meta name="theme-color" content="#000000" />
     <link rel="canonical" href={canonicalUrl} />
     <link rel="manifest" href={`${base}/manifest.webmanifest`} />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://avatars.githubusercontent.com https://raw.githubusercontent.com; connect-src 'none';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://avatars.githubusercontent.com https://raw.githubusercontent.com; connect-src 'self';" />
 
     <!-- Open Graph -->
     <meta property="og:title" content={title} />
@@ -48,9 +48,9 @@ const ogImageUrl = ogImage ?? `${siteUrl}${base}/icons/icon-512.png`;
     )}
 
     <!-- Service Worker Registration -->
-    <script is:inline>
+    <script is:inline define:vars={{ swPath: `${import.meta.env.BASE_URL}/sw.js` }}>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
+        navigator.serviceWorker.register(swPath).catch(() => {});
       }
     </script>
   </head>

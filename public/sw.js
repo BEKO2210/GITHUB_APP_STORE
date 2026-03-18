@@ -1,5 +1,6 @@
 const CACHE_NAME = 'apk-store-v1';
-const SHELL_URLS = ['/', '/index.html'];
+const BASE = self.location.pathname.replace('/sw.js', '') || '/';
+const SHELL_URLS = [BASE + '/', BASE + '/index.html'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -42,7 +43,11 @@ self.addEventListener('fetch', (event) => {
   // Network-first for navigation
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request).then((cached) => cached || caches.match('/')))
+      fetch(event.request).catch(() =>
+        caches.match(event.request).then((cached) =>
+          cached || caches.match(BASE + '/')
+        )
+      )
     );
     return;
   }
