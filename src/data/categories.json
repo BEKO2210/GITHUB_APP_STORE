@@ -1,9 +1,21 @@
 [
   {
+    "slug": "tools",
+    "label": "Tools",
+    "count": 30,
+    "description": "Utility and productivity apps"
+  },
+  {
     "slug": "media",
     "label": "Media",
+    "count": 3,
+    "description": "Media players, music, and video apps"
+  },
+  {
+    "slug": "communication",
+    "label": "Communication",
     "count": 2,
-    "description": "Media players and content apps"
+    "description": "Messaging, email, and social apps"
   },
   {
     "slug": "navigation",
@@ -15,24 +27,18 @@
     "slug": "security",
     "label": "Security",
     "count": 1,
-    "description": "Security and privacy apps"
+    "description": "Password managers and security tools"
   },
   {
-    "slug": "communication",
-    "label": "Communication",
-    "count": 2,
-    "description": "Messaging and email apps"
+    "slug": "education",
+    "label": "Education",
+    "count": 1,
+    "description": "Learning and education apps"
   },
   {
     "slug": "weather",
     "label": "Weather",
     "count": 1,
     "description": "Weather forecast apps"
-  },
-  {
-    "slug": "tools",
-    "label": "Tools",
-    "count": 1,
-    "description": "Productivity and utility apps"
   }
 ]
