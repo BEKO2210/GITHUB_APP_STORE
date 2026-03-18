@@ -1,0 +1,82 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="About — GitHub APK Store"
+  description="Learn about GitHub APK Store, a privacy-first open-source Android app discovery platform."
+  canonicalPath="/about"
+>
+  <article class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12 prose prose-invert prose-sm max-w-none">
+    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary">About GitHub APK Store</h1>
+
+    <section class="mt-8">
+      <h2 class="text-lg font-bold text-text-primary mb-3">What is this?</h2>
+      <p class="text-text-secondary leading-relaxed">
+        GitHub APK Store is a free, open-source app discovery platform that helps you find Android apps
+        hosted on GitHub. We index apps that publish APK files in their GitHub Releases, giving you a
+        curated, searchable catalog of open-source Android software.
+      </p>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-lg font-bold text-text-primary mb-3">How does it work?</h2>
+      <p class="text-text-secondary leading-relaxed">
+        Every day, an automated process scans GitHub for repositories that have Android APK files in
+        their releases. We collect basic information like the app name, description, version, and
+        download size. All of this data is publicly available through the GitHub API.
+      </p>
+      <p class="text-text-secondary leading-relaxed mt-3">
+        When you click "Download," you're taken directly to the official GitHub release page — we never
+        host, modify, or proxy any APK files.
+      </p>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-lg font-bold text-text-primary mb-3">How to submit your app</h2>
+      <ol class="text-text-secondary leading-relaxed space-y-2 list-decimal list-inside">
+        <li>Host your Android app's source code on GitHub</li>
+        <li>Create a release and attach your <code class="bg-surface px-1.5 py-0.5 rounded text-text-primary">.apk</code> file as a release asset</li>
+        <li>Add the topic <code class="bg-surface px-1.5 py-0.5 rounded text-text-primary">github-apk-store</code> to your repository</li>
+        <li>Your app will be discovered and indexed in the next daily scan</li>
+      </ol>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-lg font-bold text-text-primary mb-3">FAQ</h2>
+
+      <div class="space-y-6">
+        <div>
+          <h3 class="font-semibold text-text-primary">Is this safe?</h3>
+          <p class="text-text-secondary leading-relaxed mt-1">
+            We only link to official GitHub releases. You can always verify the source code before
+            installing. We recommend checking the repository's stars, contributors, and license.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-text-primary">Do you track users?</h3>
+          <p class="text-text-secondary leading-relaxed mt-1">
+            No. This site has zero tracking, zero cookies, and makes zero external requests.
+            See our <a href={`${import.meta.env.BASE_URL}/privacy`} class="text-text-primary underline hover:text-accent-hover">privacy policy</a>.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-text-primary">How often is the data updated?</h3>
+          <p class="text-text-secondary leading-relaxed mt-1">
+            The index is refreshed daily at 6 AM UTC via GitHub Actions.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-text-primary">Can I remove my app?</h3>
+          <p class="text-text-secondary leading-relaxed mt-1">
+            Simply remove the <code class="bg-surface px-1.5 py-0.5 rounded text-text-primary">github-apk-store</code> topic from your repository,
+            and it will be removed in the next scan.
+          </p>
+        </div>
+      </div>
+    </section>
+  </article>
+</Base>

@@ -1,0 +1,53 @@
+---
+---
+
+<div id="search-container" class="w-full max-w-2xl mx-auto">
+  <div id="pagefind-search"></div>
+</div>
+
+<style is:global>
+  .pagefind-ui {
+    --pagefind-ui-scale: 1;
+    --pagefind-ui-primary: #ffffff;
+    --pagefind-ui-text: #a0a0a0;
+    --pagefind-ui-background: #0a0a0a;
+    --pagefind-ui-border: #1f1f1f;
+    --pagefind-ui-tag: #141414;
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 12px;
+    --pagefind-ui-font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  .pagefind-ui .pagefind-ui__search-input {
+    background: #0a0a0a;
+    color: #ffffff;
+    border: 1px solid #1f1f1f;
+  }
+
+  .pagefind-ui .pagefind-ui__search-input:focus {
+    border-color: #ffffff;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+  }
+
+  .pagefind-ui .pagefind-ui__result-link {
+    color: #ffffff;
+  }
+
+  .pagefind-ui .pagefind-ui__result-excerpt {
+    color: #a0a0a0;
+  }
+</style>
+
+<script>
+  async function initPagefind() {
+    // @ts-ignore - Pagefind loaded at build time
+    const { PagefindUI } = await import('@pagefind/default-ui');
+    new PagefindUI({
+      element: '#pagefind-search',
+      showSubResults: true,
+      showImages: false,
+    });
+  }
+  initPagefind();
+</script>

@@ -1,0 +1,51 @@
+---
+import AppPage from '../../layouts/AppPage.astro';
+import AppDetail from '../../components/AppDetail.astro';
+import AppCard from '../../components/AppCard.astro';
+import type { AppEntry } from '../../types/app';
+
+export async function getStaticPaths() {
+  const apps: AppEntry[] = await import('../../data/apps.json').then((m) => m.default as unknown as AppEntry[]);
+  return apps.map((app) => ({
+    params: { id: app.id },
+    props: { app, allApps: apps },
+  }));
+}
+
+interface Props {
+  app: AppEntry;
+  allApps: AppEntry[];
+}
+
+const { app, allApps } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+const relatedApps = allApps
+  .filter((a) => a.category === app.category && a.id !== app.id)
+  .slice(0, 4);
+---
+
+<AppPage app={app}>
+  <!-- Breadcrumb -->
+  <nav class="mx-auto max-w-4xl px-4 pt-6 sm:px-6 lg:px-8" aria-label="Breadcrumb">
+    <ol class="flex items-center gap-2 text-sm text-text-muted">
+      <li><a href={`${base}/`} class="hover:text-text-secondary transition-colors">Home</a></li>
+      <li aria-hidden="true">/</li>
+      <li><a href={`${base}/category/${app.category}`} class="hover:text-text-secondary transition-colors capitalize">{app.category}</a></li>
+      <li aria-hidden="true">/</li>
+      <li class="text-text-secondary">{app.name}</li>
+    </ol>
+  </nav>
+
+  <AppDetail app={app} />
+
+  <!-- Related Apps -->
+  {relatedApps.length > 0 && (
+    <section class="mx-auto max-w-4xl px-4 pb-12 sm:px-6 lg:px-8">
+      <h2 class="text-lg font-bold text-text-primary mb-4">Related Apps</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {relatedApps.map((a) => <AppCard app={a} />)}
+      </div>
+    </section>
+  )}
+</AppPage>

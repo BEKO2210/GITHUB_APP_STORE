@@ -1,0 +1,8 @@
+[
+  { "slug": "media", "label": "Media", "count": 2, "description": "Media players, music, and video apps" },
+  { "slug": "communication", "label": "Communication", "count": 2, "description": "Messaging, email, and social apps" },
+  { "slug": "navigation", "label": "Navigation", "count": 1, "description": "Maps and navigation apps" },
+  { "slug": "security", "label": "Security", "count": 1, "description": "Password managers and security tools" },
+  { "slug": "weather", "label": "Weather", "count": 1, "description": "Weather forecast apps" },
+  { "slug": "tools", "label": "Tools", "count": 1, "description": "Utility and productivity apps" }
+]

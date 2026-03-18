@@ -1,0 +1,54 @@
+---
+import Base from '../../layouts/Base.astro';
+import AppCard from '../../components/AppCard.astro';
+import type { AppEntry, CategoryEntry } from '../../types/app';
+
+export async function getStaticPaths() {
+  const apps: AppEntry[] = await import('../../data/apps.json').then((m) => m.default as unknown as AppEntry[]);
+  const categories: CategoryEntry[] = await import('../../data/categories.json').then((m) => m.default as unknown as CategoryEntry[]);
+
+  return categories.map((cat) => ({
+    params: { slug: cat.slug },
+    props: {
+      category: cat,
+      apps: apps.filter((a) => a.category === cat.slug),
+    },
+  }));
+}
+
+interface Props {
+  category: CategoryEntry;
+  apps: AppEntry[];
+}
+
+const { category, apps } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+// Sort by stars by default
+const sortedApps = [...apps].sort((a, b) => b.stars - a.stars);
+---
+
+<Base
+  title={`${category.label} Apps — GitHub APK Store`}
+  description={category.description}
+  canonicalPath={`/category/${category.slug}`}
+>
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+    <!-- Breadcrumb -->
+    <nav class="mb-6" aria-label="Breadcrumb">
+      <ol class="flex items-center gap-2 text-sm text-text-muted">
+        <li><a href={`${base}/`} class="hover:text-text-secondary transition-colors">Home</a></li>
+        <li aria-hidden="true">/</li>
+        <li class="text-text-secondary">{category.label}</li>
+      </ol>
+    </nav>
+
+    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary">{category.label}</h1>
+    <p class="mt-2 text-text-secondary">{category.description}</p>
+    <p class="mt-1 text-sm text-text-muted">{category.count} app{category.count !== 1 ? 's' : ''}</p>
+
+    <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {sortedApps.map((app) => <AppCard app={app} />)}
+    </div>
+  </section>
+</Base>

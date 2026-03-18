@@ -1,0 +1,42 @@
+---
+import Base from './Base.astro';
+import type { AppEntry } from '../types/app';
+
+interface Props {
+  app: AppEntry;
+}
+
+const { app } = Astro.props;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: app.name,
+  description: app.description,
+  applicationCategory: 'GameApplication',
+  operatingSystem: 'Android',
+  url: app.repoUrl,
+  author: {
+    '@type': 'Person',
+    name: app.author,
+    url: app.authorUrl,
+  },
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  softwareVersion: app.version,
+  fileSize: app.sizeFormatted,
+  datePublished: app.lastUpdated,
+};
+---
+
+<Base
+  title={`${app.name} — GitHub APK Store`}
+  description={app.description || `Download ${app.name} APK from GitHub releases`}
+  canonicalPath={`/apps/${app.id}`}
+  jsonLd={jsonLd}
+>
+  <slot />
+</Base>

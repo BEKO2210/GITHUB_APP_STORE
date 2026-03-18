@@ -1,0 +1,88 @@
+---
+import Base from '../layouts/Base.astro';
+import AppCard from '../components/AppCard.astro';
+import StatsBanner from '../components/StatsBanner.astro';
+import SearchBar from '../components/SearchBar.astro';
+import CategoryBadge from '../components/CategoryBadge.astro';
+import PWAPrompt from '../components/PWAPrompt.astro';
+import type { AppEntry, StoreMeta, CategoryEntry } from '../types/app';
+
+const apps: AppEntry[] = await Astro.glob('../data/apps.json').then(() =>
+  import('../data/apps.json').then((m) => m.default as unknown as AppEntry[])
+);
+const meta: StoreMeta = await import('../data/meta.json').then((m) => m.default as unknown as StoreMeta);
+const categories: CategoryEntry[] = await import('../data/categories.json').then((m) => m.default as unknown as CategoryEntry[]);
+
+const topApps = apps.slice(0, 8);
+const recentApps = [...apps].sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()).slice(0, 8);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'GitHub APK Store',
+  description: 'Privacy-first Android app discovery from GitHub releases',
+  url: import.meta.env.SITE,
+};
+---
+
+<Base
+  title="GitHub APK Store — Privacy-First Android Apps"
+  description="Discover open-source Android apps from GitHub releases. No tracking, no cookies, no ads. Your privacy-first alternative to app stores."
+  jsonLd={jsonLd}
+>
+  <!-- Hero -->
+  <section class="px-4 pt-16 pb-12 text-center">
+    <h1 class="text-3xl sm:text-5xl font-bold tracking-tight text-text-primary">
+      Open-Source Apps,<br />
+      <span class="text-text-secondary">Zero Tracking</span>
+    </h1>
+    <p class="mt-4 text-text-secondary max-w-xl mx-auto leading-relaxed">
+      Discover Android apps from GitHub releases. Privacy-first, no cookies, no ads.
+      Every download links directly to the official GitHub release.
+    </p>
+    <div class="mt-8">
+      <SearchBar />
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="border-y border-border">
+    <div class="mx-auto max-w-7xl">
+      <StatsBanner meta={meta} />
+    </div>
+  </section>
+
+  <!-- Top Apps -->
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+    <h2 class="text-xl font-bold tracking-tight text-text-primary mb-6">Top Apps</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {topApps.map((app) => <AppCard app={app} />)}
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+    <h2 class="text-xl font-bold tracking-tight text-text-primary mb-6">Categories</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      {categories.map((cat) => (
+        <a
+          href={`${import.meta.env.BASE_URL}/category/${cat.slug}`}
+          class="flex flex-col items-center gap-2 rounded-xl border border-border bg-surface p-4 hover:border-accent-hover hover:bg-elevated transition-all text-center"
+        >
+          <span class="text-lg font-bold text-text-primary">{cat.count}</span>
+          <span class="text-sm text-text-secondary">{cat.label}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Recent -->
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+    <h2 class="text-xl font-bold tracking-tight text-text-primary mb-6">Recently Added</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {recentApps.map((app) => <AppCard app={app} />)}
+    </div>
+  </section>
+
+  <PWAPrompt />
+</Base>
