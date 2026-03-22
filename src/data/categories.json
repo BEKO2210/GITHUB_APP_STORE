@@ -2,13 +2,13 @@
   {
     "slug": "tools",
     "label": "Tools",
-    "count": 596,
+    "count": 597,
     "description": "Utility and productivity apps"
   },
   {
     "slug": "media",
     "label": "Media",
-    "count": 150,
+    "count": 151,
     "description": "Media players, music, and video apps"
   },
   {
@@ -26,7 +26,7 @@
   {
     "slug": "communication",
     "label": "Communication",
-    "count": 41,
+    "count": 42,
     "description": "Messaging, email, and social apps"
   },
   {
