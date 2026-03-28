@@ -3,7 +3,6 @@ import Base from '../layouts/Base.astro';
 import AppCard from '../components/AppCard.astro';
 import StatsBanner from '../components/StatsBanner.astro';
 import SearchBar from '../components/SearchBar.astro';
-import CategoryBadge from '../components/CategoryBadge.astro';
 import PWAPrompt from '../components/PWAPrompt.astro';
 import type { AppEntry, StoreMeta, CategoryEntry } from '../types/app';
 
@@ -12,9 +11,32 @@ const apps: AppEntry[] = await Astro.glob('../data/apps.json').then(() =>
 );
 const meta: StoreMeta = await import('../data/meta.json').then((m) => m.default as unknown as StoreMeta);
 const categories: CategoryEntry[] = await import('../data/categories.json').then((m) => m.default as unknown as CategoryEntry[]);
+const base = import.meta.env.BASE_URL ?? '/GITHUB_APP_STORE';
 
-const topApps = apps.slice(0, 8);
+const topApps = apps.slice(0, 12);
 const recentApps = [...apps].sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()).slice(0, 8);
+
+// Category icons map (inline SVG path data)
+const categoryIcons: Record<string, string> = {
+  tools: 'M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z',
+  media: 'M9 18V5l12-2v13M9 18a3 3 0 11-6 0 3 3 0 016 0zm12-2a3 3 0 11-6 0 3 3 0 016 0z',
+  security: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+  customization: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z',
+  communication: 'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z',
+  navigation: 'M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z M12 7a3 3 0 110 6 3 3 0 010-6z',
+  reading: 'M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z',
+  games: 'M6 12h4m-2-2v4m6 0h.01M18 12h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z',
+  browser: 'M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 0a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10zM2 12h20',
+  finance: 'M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6',
+  education: 'M22 10v6M2 10l10-5 10 5-10 5z M6 12v5c3 3 8 3 12 0v-5',
+  weather: 'M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z',
+  development: 'M16 18l6-6-6-6M8 6l-6 6 6 6',
+  health: 'M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z',
+  photography: 'M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z M12 17a4 4 0 110-8 4 4 0 010 8z',
+  productivity: 'M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11',
+  social: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 110-8 4 4 0 010 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75',
+  unknown: 'M12 22a10 10 0 110-20 10 10 0 010 20zM9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01',
+};
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -40,8 +62,14 @@ const jsonLd = {
       Discover Android apps from GitHub releases. Privacy-first, no cookies, no ads.
       Every download links directly to the official GitHub release.
     </p>
-    <div class="mt-8">
-      <SearchBar />
+    <div class="mt-8 max-w-2xl mx-auto">
+      <a href={`${base}/search`} class="flex items-center gap-3 w-full rounded-xl border border-border bg-surface px-4 py-3 text-text-muted hover:border-accent-hover transition-colors">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        Search {meta.totalApps} apps...
+      </a>
     </div>
   </section>
 
@@ -52,34 +80,46 @@ const jsonLd = {
     </div>
   </section>
 
-  <!-- Top Apps -->
-  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-    <h2 class="text-xl font-bold tracking-tight text-text-primary mb-6">Top Apps</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {topApps.map((app) => <AppCard app={app} />)}
-    </div>
-  </section>
-
   <!-- Categories -->
   <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-    <h2 class="text-xl font-bold tracking-tight text-text-primary mb-6">Categories</h2>
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold tracking-tight text-text-primary">Categories</h2>
+      <a href={`${base}/search`} class="text-sm text-text-secondary hover:text-text-primary transition-colors">Browse all</a>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
       {categories.map((cat) => (
         <a
-          href={`${import.meta.env.BASE_URL}/category/${cat.slug}`}
-          class="flex flex-col items-center gap-2 rounded-xl border border-border bg-surface p-4 hover:border-accent-hover hover:bg-elevated transition-all text-center"
+          href={`${base}/category/${cat.slug}`}
+          class="flex flex-col items-center gap-2 rounded-xl border border-border bg-surface p-4 hover:border-accent-hover hover:bg-elevated transition-all text-center group"
         >
-          <span class="text-lg font-bold text-text-primary">{cat.count}</span>
-          <span class="text-sm text-text-secondary">{cat.label}</span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-text-muted group-hover:text-text-primary transition-colors" aria-hidden="true">
+            <path d={categoryIcons[cat.slug] || categoryIcons.unknown} />
+          </svg>
+          <span class="text-sm font-medium text-text-primary">{cat.label}</span>
+          <span class="text-xs text-text-muted">{cat.count} apps</span>
         </a>
       ))}
     </div>
   </section>
 
+  <!-- Top Apps -->
+  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold tracking-tight text-text-primary">Top Apps</h2>
+      <a href={`${base}/search`} class="text-sm text-text-secondary hover:text-text-primary transition-colors">View all</a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {topApps.map((app) => <AppCard app={app} />)}
+    </div>
+  </section>
+
   <!-- Recent -->
   <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-    <h2 class="text-xl font-bold tracking-tight text-text-primary mb-6">Recently Added</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold tracking-tight text-text-primary">Recently Added</h2>
+      <a href={`${base}/search`} class="text-sm text-text-secondary hover:text-text-primary transition-colors">View all</a>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {recentApps.map((app) => <AppCard app={app} />)}
     </div>
   </section>

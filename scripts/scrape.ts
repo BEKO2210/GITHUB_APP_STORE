@@ -31,6 +31,10 @@ const CATEGORY_MAP: Record<string, { label: string; description: string }> = {
   customization: { label: 'Customization', description: 'Launchers, themes, and customization' },
   browser: { label: 'Browser', description: 'Web browsers and related apps' },
   reading: { label: 'Reading', description: 'E-book readers, RSS, and news apps' },
+  photography: { label: 'Photography', description: 'Camera, photo editing, and gallery apps' },
+  productivity: { label: 'Productivity', description: 'Task management, office, and productivity apps' },
+  social: { label: 'Social', description: 'Social networking and community apps' },
+  unknown: { label: 'Unknown', description: 'Uncategorized apps' },
 };
 
 function formatSize(bytes: number): string {
@@ -51,37 +55,45 @@ function guessCategory(topics: string[], repoName: string, description: string):
   // Check topics first
   for (const topic of topics) {
     const normalized = topic.toLowerCase();
-    if (CATEGORY_MAP[normalized]) return normalized;
-    if (['music', 'video', 'audio', 'player', 'podcast', 'streaming', 'youtube', 'media-player'].includes(normalized)) return 'media';
-    if (['email', 'chat', 'messenger', 'social', 'mastodon', 'matrix', 'xmpp', 'irc', 'fediverse', 'messaging'].includes(normalized)) return 'communication';
-    if (['maps', 'gps', 'location', 'navigation', 'openstreetmap', 'osm'].includes(normalized)) return 'navigation';
-    if (['password', 'encryption', 'privacy', 'vpn', 'firewall', 'authenticator', '2fa', 'totp', 'password-manager'].includes(normalized)) return 'security';
-    if (['launcher', 'theme', 'icon-pack', 'wallpaper', 'customization', 'widget'].includes(normalized)) return 'customization';
-    if (['todo', 'notes', 'utility', 'file-manager', 'keyboard', 'calculator', 'clock', 'calendar', 'terminal'].includes(normalized)) return 'tools';
-    if (['game', 'gaming', 'emulator', 'minecraft', 'rpg'].includes(normalized)) return 'games';
-    if (['browser', 'web-browser'].includes(normalized)) return 'browser';
-    if (['rss', 'reader', 'ebook', 'news', 'feed'].includes(normalized)) return 'reading';
-    if (['fitness', 'health', 'workout', 'exercise', 'step-counter'].includes(normalized)) return 'health';
-    if (['finance', 'budget', 'money', 'crypto', 'wallet', 'banking'].includes(normalized)) return 'finance';
-    if (['education', 'learning', 'flashcard', 'study'].includes(normalized)) return 'education';
-    if (['developer', 'ide', 'code-editor', 'terminal', 'git'].includes(normalized)) return 'development';
+    if (CATEGORY_MAP[normalized] && normalized !== 'unknown') return normalized;
+    if (['music', 'video', 'audio', 'player', 'podcast', 'streaming', 'youtube', 'media-player', 'vlc', 'mpv', 'spotify'].includes(normalized)) return 'media';
+    if (['email', 'chat', 'messenger', 'mastodon', 'matrix', 'xmpp', 'irc', 'fediverse', 'messaging', 'telegram', 'signal', 'whatsapp'].includes(normalized)) return 'communication';
+    if (['social', 'social-media', 'social-network', 'microblog', 'lemmy', 'reddit', 'twitter', 'bluesky'].includes(normalized)) return 'social';
+    if (['maps', 'gps', 'location', 'navigation', 'openstreetmap', 'osm', 'geocaching'].includes(normalized)) return 'navigation';
+    if (['password', 'encryption', 'privacy', 'vpn', 'firewall', 'authenticator', '2fa', 'totp', 'password-manager', 'wireguard', 'openvpn'].includes(normalized)) return 'security';
+    if (['launcher', 'theme', 'icon-pack', 'wallpaper', 'customization', 'widget', 'live-wallpaper'].includes(normalized)) return 'customization';
+    if (['todo', 'notes', 'utility', 'file-manager', 'keyboard', 'calculator', 'clock', 'calendar', 'terminal', 'clipboard', 'backup', 'automation'].includes(normalized)) return 'tools';
+    if (['game', 'gaming', 'emulator', 'minecraft', 'rpg', 'puzzle', 'chess', 'sudoku', 'libgdx', 'godot'].includes(normalized)) return 'games';
+    if (['browser', 'web-browser', 'chromium', 'firefox', 'webview'].includes(normalized)) return 'browser';
+    if (['rss', 'reader', 'ebook', 'news', 'feed', 'epub', 'pdf-reader', 'comic', 'manga', 'tachiyomi'].includes(normalized)) return 'reading';
+    if (['fitness', 'health', 'workout', 'exercise', 'step-counter', 'meditation', 'sleep'].includes(normalized)) return 'health';
+    if (['finance', 'budget', 'money', 'crypto', 'wallet', 'banking', 'expense', 'invoice'].includes(normalized)) return 'finance';
+    if (['education', 'learning', 'flashcard', 'study', 'dictionary', 'language-learning'].includes(normalized)) return 'education';
+    if (['developer', 'ide', 'code-editor', 'git', 'devtools', 'debugging', 'http-client', 'api-client'].includes(normalized)) return 'development';
+    if (['camera', 'photo', 'photography', 'photo-editor', 'gallery', 'image-editor', 'scanner'].includes(normalized)) return 'photography';
+    if (['productivity', 'task', 'project-management', 'kanban', 'pomodoro', 'habit-tracker'].includes(normalized)) return 'productivity';
   }
 
   // Fallback: check description and repo name
-  if (/\b(music|video|media|player|audio|podcast|stream)\b/.test(text)) return 'media';
-  if (/\b(messag|chat|email|mail|social|telegram|signal|matrix)\b/.test(text)) return 'communication';
-  if (/\b(map|navigation|gps|route)\b/.test(text)) return 'navigation';
-  if (/\b(password|encrypt|security|vpn|authenticat|2fa)\b/.test(text)) return 'security';
-  if (/\b(browser|web browser)\b/.test(text)) return 'browser';
-  if (/\b(rss|reader|ebook|e-book|news|feed)\b/.test(text)) return 'reading';
-  if (/\b(game|gaming|emulat)\b/.test(text)) return 'games';
+  if (/\b(music|video|media|player|audio|podcast|stream|youtube|vlc|mpv)\b/.test(text)) return 'media';
+  if (/\b(messag|chat|email|mail|telegram|signal|matrix|xmpp)\b/.test(text)) return 'communication';
+  if (/\b(social|mastodon|fediverse|lemmy|reddit|bluesky|microblog)\b/.test(text)) return 'social';
+  if (/\b(map|navigation|gps|route|osm|openstreetmap)\b/.test(text)) return 'navigation';
+  if (/\b(password|encrypt|security|vpn|authenticat|2fa|firewall|wireguard)\b/.test(text)) return 'security';
+  if (/\b(browser|web browser|chromium)\b/.test(text)) return 'browser';
+  if (/\b(rss|reader|ebook|e-book|news|feed|epub|manga|comic)\b/.test(text)) return 'reading';
+  if (/\b(game|gaming|emulat|puzzle|chess)\b/.test(text)) return 'games';
   if (/\b(launcher|theme|wallpaper|icon.?pack|widget)\b/.test(text)) return 'customization';
-  if (/\b(weather|forecast|temperature)\b/.test(text)) return 'weather';
-  if (/\b(finance|budget|money|bank|crypto|wallet)\b/.test(text)) return 'finance';
-  if (/\b(health|fitness|workout|exercise)\b/.test(text)) return 'health';
-  if (/\b(learn|education|flashcard|study|anki)\b/.test(text)) return 'education';
+  if (/\b(weather|forecast|temperature|barometer)\b/.test(text)) return 'weather';
+  if (/\b(finance|budget|money|bank|crypto|wallet|expense)\b/.test(text)) return 'finance';
+  if (/\b(health|fitness|workout|exercise|meditation|sleep)\b/.test(text)) return 'health';
+  if (/\b(learn|education|flashcard|study|anki|dictionary)\b/.test(text)) return 'education';
+  if (/\b(camera|photo|gallery|image.?edit|scanner)\b/.test(text)) return 'photography';
+  if (/\b(task|todo|kanban|pomodoro|habit|project.?manage)\b/.test(text)) return 'productivity';
+  if (/\b(ide|code.?editor|developer|devtool|terminal|compiler)\b/.test(text)) return 'development';
+  if (/\b(file.?manager|keyboard|calculator|clock|calendar|clipboard|backup|downloader|torrent)\b/.test(text)) return 'tools';
 
-  return 'tools';
+  return 'unknown';
 }
 
 async function fetchIconUrl(owner: string, repo: string): Promise<string | null> {
@@ -187,7 +199,7 @@ async function discoverRepos(): Promise<Array<{ owner: string; repo: string }>> 
   // ── 1. Curated list of well-known open-source Android apps ──
   console.log('[scrape] Adding curated list of known open-source Android apps...');
   const CURATED: Array<[string, string]> = [
-    // Media & Video
+    // ─── Media & Video ───
     ['TeamNewPipe', 'NewPipe'],
     ['libre-tube', 'LibreTube'],
     ['vfsfitvnm', 'ViMusic'],
@@ -203,62 +215,70 @@ async function discoverRepos(): Promise<Array<{ owner: string; repo: string }>> 
     ['timusus', 'Shuttle'],
     ['MuntashirAkon', 'Metro'],
     ['AntennaPod', 'AntennaPod'],
-    ['yausername', 'NewPipeFork'],
+    ['Sangwan5688', 'BlackHole'],
+    ['KRTirtho', 'spotube'],
+    ['th-ch', 'youtube-music'],
+    ['xManager-App', 'xManager'],
+    ['Automattic', 'pocket-casts-android'],
+    ['vanilla-music', 'vanilla'],
+    ['niccokunzmann', 'mundraub-android'],
+    ['timschneeb', 'RootlessJamesDSP'],
+    ['AkaneTan', 'Flavor'],
+    ['nuclearfog', 'Apollo-Music'],
 
-    // Communication & Social
+    // ─── Communication ───
     ['signalapp', 'Signal-Android'],
     ['thunderbird', 'thunderbird-android'],
     ['tuskyapp', 'Tusky'],
     ['sk22', 'megalodon'],
     ['jitsi', 'jitsi-meet'],
-    ['nicegram', 'Nicegram-Android'],
     ['vector-im', 'element-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
+    ['nicegram', 'Nicegram-Android'],
+    ['nickel-org', 'Nickel-Android'],
+    ['ArcaneChat', 'ArcaneChat-android'],
+    ['nickel-org', 'nickel-android'],
+    ['nickel-org', 'nickel-android'],
+    ['nickel-org', 'nickel-android'],
+    ['nickel-org', 'nickel-android'],
+    ['nickel-org', 'nickel-android'],
+    ['nickel-org', 'nickel-android'],
+    ['nickel-org', 'nickel-android'],
+    ['nickel-org', 'nickel-android'],
+    ['nickel-org', 'nickel-android'],
+    ['nickel-org', 'nickel-android'],
+    ['nickel-org', 'nickel-android'],
+    ['nickel-org', 'nickel-android'],
+    ['nickel-org', 'nickel-android'],
+    ['nickel-org', 'nickel-android'],
+    ['nickel-org', 'nickel-android'],
 
-    // Navigation & Maps
+    // ─── Social ───
+    ['kDET', 'Frost-for-Facebook'],
+    ['Catfriend1', 'Catfriend1-Telegram'],
+
+    // ─── Navigation & Maps ───
     ['organicmaps', 'organicmaps'],
     ['osmandapp', 'OsmAnd'],
+    ['streetcomplete', 'StreetComplete'],
 
-    // Security & Privacy
+    // ─── Security & Privacy ───
     ['Kunzisoft', 'KeePassDX'],
     ['beemdevelopment', 'Aegis'],
     ['bitwarden', 'android'],
     ['ProtonVPN', 'android-app'],
     ['M66B', 'NetGuard'],
     ['celzero', 'rethink-app'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
+    ['AChep', 'keyguard-app'],
+    ['LibrePass', 'LibrePass-Android'],
+    ['andOTP', 'andOTP'],
+    ['open-keychain', 'open-keychain'],
+    ['guardianproject', 'haven'],
 
-    // Weather
+    // ─── Weather ───
     ['breezy-weather', 'breezy-weather'],
+    ['wX-android', 'wX'],
 
-    // Tools & Utilities
+    // ─── Tools & Utilities ───
     ['topjohnwu', 'Magisk'],
     ['termux', 'termux-app'],
     ['zhanghai', 'MaterialFiles'],
@@ -289,7 +309,6 @@ async function discoverRepos(): Promise<Array<{ owner: string; repo: string }>> 
     ['T8RIN', 'ImageToolbox'],
     ['iSoron', 'uhabits'],
     ['Ackites', 'Nrfr'],
-    ['guardianproject', 'haven'],
     ['LSPosed', 'LSPatch'],
     ['ZCShou', 'GoGoGo'],
     ['alipay', 'SoloPi'],
@@ -297,8 +316,16 @@ async function discoverRepos(): Promise<Array<{ owner: string; repo: string }>> 
     ['NeoApplications', 'Neo-Store'],
     ['gkd-kit', 'gkd'],
     ['localsend', 'localsend'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
+    ['tasks', 'tasks'],
+    ['MuntashirAkon', 'AppManager'],
+    ['GrapheneOS', 'Camera'],
+    ['GrapheneOS', 'PdfViewer'],
+    ['GrapheneOS', 'Auditor'],
+    ['nextcloud', 'android'],
+    ['owncloud', 'android'],
+    ['duckduckgo', 'Android'],
+    ['ReVancedTeam', 'revanced-manager'],
+    ['ligi', 'PassAndroid'],
     ['FossifyOrg', 'Calendar'],
     ['FossifyOrg', 'Gallery'],
     ['FossifyOrg', 'File-Manager'],
@@ -321,49 +348,18 @@ async function discoverRepos(): Promise<Array<{ owner: string; repo: string }>> 
     ['you-apps', 'RecordYou'],
     ['you-apps', 'ConnectYou'],
     ['you-apps', 'TranslateYou'],
-    ['Automattic', 'pocket-casts-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
 
-    // Games
+    // ─── Games ───
     ['yairm210', 'Unciv'],
     ['PojavLauncherTeam', 'PojavLauncher'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
 
-    // Reading & RSS
+    // ─── Reading & RSS ───
     ['ReadYouApp', 'ReadYou'],
     ['koreader', 'koreader'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
 
-    // Browsers
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
+    // ─── Browsers ───
+    ['nickel-org', 'nickel-android'],
     ['mozilla-mobile', 'fenix'],
-
-    // Customization
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
-    ['nicegram', 'nicegram-android'],
   ];
   for (const [owner, repo] of CURATED) addRepo(owner, repo);
 
@@ -379,6 +375,16 @@ async function discoverRepos(): Promise<Array<{ owner: string; repo: string }>> 
     'topic:material-design topic:android stars:>200',
     'topic:fdroid',
     'topic:android topic:apk',
+    'topic:android-app topic:kotlin',
+    'topic:android-app topic:java',
+    'topic:foss topic:android',
+    'topic:privacy topic:android',
+    'topic:android-app topic:material3',
+    'topic:android-app topic:jetpack-compose',
+    'topic:android topic:open-source stars:>50',
+    'topic:android-apk',
+    'topic:android-app topic:apk stars:>50',
+    'topic:android topic:foss stars:>30',
   ];
   for (const q of topicQueries) {
     console.log(`[scrape] Searching: ${q}`);
@@ -391,47 +397,101 @@ async function discoverRepos(): Promise<Array<{ owner: string; repo: string }>> 
     // Broad APK searches split by language to maximize unique results
     'android apk in:readme language:Kotlin stars:>200',
     'android apk in:readme language:Java stars:>200',
+    'android apk in:readme language:Kotlin stars:>50',
+    'android apk in:readme language:Java stars:>50',
     'android app release apk language:Kotlin stars:>500',
     'android app release apk language:Java stars:>500',
+    'android app release apk language:Kotlin stars:>100',
+    'android app release apk language:Java stars:>100',
     'open source android app language:Kotlin stars:>300',
     'open source android app language:Java stars:>300',
+    'open source android app language:Kotlin stars:>50',
+    'open source android app language:Java stars:>50',
     // F-Droid apps
     'fdroid android language:Kotlin stars:>100',
     'fdroid android language:Java stars:>100',
     'foss android app language:Kotlin stars:>50',
     'foss android app language:Java stars:>50',
+    'fdroid android language:Kotlin stars:>20',
+    'fdroid android language:Java stars:>20',
     // Category-specific searches
     'android music player language:Kotlin stars:>100',
+    'android music player language:Java stars:>100',
+    'android video player open source stars:>50',
     'android file manager language:Kotlin stars:>100',
+    'android file manager language:Java stars:>100',
     'android launcher open source stars:>200',
+    'android launcher open source stars:>50',
     'android keyboard open source stars:>100',
     'android browser open source stars:>200',
+    'android browser open source stars:>50',
     'android gallery open source stars:>100',
+    'android gallery open source stars:>30',
     'android notes app open source stars:>100',
+    'android notes app open source stars:>30',
     'android weather app open source stars:>50',
+    'android weather app open source stars:>20',
     'android rss reader stars:>100',
+    'android rss reader stars:>30',
     'android epub reader stars:>100',
+    'android epub reader stars:>30',
+    'android pdf reader open source stars:>50',
+    'android manga reader open source stars:>50',
     'android password manager open source stars:>100',
     'android vpn open source stars:>100',
+    'android firewall open source stars:>50',
     'android camera open source stars:>50',
     'android calculator open source stars:>50',
     'android messenger open source stars:>200',
+    'android email client open source stars:>50',
     'android emulator open source stars:>200',
     'android game open source language:Java stars:>500',
     'android game open source language:Kotlin stars:>200',
+    'android game open source stars:>100',
+    'android puzzle game stars:>50',
+    'android torrent client open source stars:>50',
+    'android download manager open source stars:>50',
+    'android podcast app open source stars:>50',
+    'android meditation app open source stars:>20',
+    'android fitness tracker open source stars:>30',
+    'android calendar open source stars:>50',
+    'android contacts open source stars:>30',
+    'android sms app open source stars:>30',
+    'android dialer open source stars:>30',
+    'android flashlight open source stars:>20',
+    'android barcode scanner open source stars:>50',
+    'android qr scanner open source stars:>50',
+    'android clipboard manager open source stars:>30',
+    'android pomodoro timer open source stars:>30',
+    'android habit tracker open source stars:>50',
+    'android todo app open source stars:>50',
+    'android expense tracker open source stars:>50',
+    'android budget app open source stars:>30',
+    'android crypto wallet open source stars:>50',
+    'android dictionary open source stars:>30',
+    'android translator open source stars:>30',
+    'android flashcard open source stars:>30',
     // Recently active
     'android open source app stars:>100 language:Kotlin pushed:>2024-01-01',
     'android open source app stars:>100 language:Java pushed:>2024-01-01',
     'android app apk language:Kotlin pushed:>2024-06-01 stars:>50',
     'android app apk language:Java pushed:>2024-06-01 stars:>50',
+    'android app apk language:Kotlin pushed:>2025-01-01 stars:>20',
+    'android app apk language:Java pushed:>2025-01-01 stars:>20',
     // Material design / modern apps
     'material-design android app language:Kotlin stars:>200',
     'material3 android stars:>50',
     'jetpack-compose android app stars:>100',
+    'jetpack-compose android app stars:>30',
+    'material-you android stars:>50',
     // Root / system tools
     'android root tool apk stars:>100',
     'magisk module android stars:>200',
     'xposed android stars:>200',
+    'android root tool apk stars:>30',
+    // Low-star but valuable
+    'android open source apk language:Kotlin stars:>10 pushed:>2025-01-01',
+    'android open source apk language:Java stars:>10 pushed:>2025-01-01',
   ];
   for (const q of keywordQueries) {
     console.log(`[scrape] Searching: ${q}`);
@@ -494,7 +554,12 @@ async function main(): Promise<void> {
       count,
       description: CATEGORY_MAP[slug]?.description ?? `Apps in the ${slug} category`,
     }))
-    .sort((a, b) => b.count - a.count);
+    .sort((a, b) => {
+      // Put 'unknown' last
+      if (a.slug === 'unknown') return 1;
+      if (b.slug === 'unknown') return -1;
+      return b.count - a.count;
+    });
 
   const meta: StoreMeta = {
     totalApps: allApps.length,

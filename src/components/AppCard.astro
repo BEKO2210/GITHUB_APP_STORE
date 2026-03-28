@@ -25,12 +25,12 @@ const timeAgo = (() => {
 })();
 ---
 
-<a href={`${base}/apps/${app.id}`} class="group block rounded-xl border border-border bg-surface p-4 hover:border-accent-hover hover:bg-elevated transition-all duration-200" data-pagefind-body>
+<a href={`${base}/apps/${app.id}`} class="group block rounded-xl border border-border bg-surface p-4 hover:border-accent-hover hover:bg-elevated transition-all duration-200 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-black" data-pagefind-body aria-label={`${app.name} by ${app.author}`}>
   <div class="flex items-start gap-3">
     {app.icon ? (
-      <img src={app.icon} alt="" width="48" height="48" class="rounded-xl bg-elevated" loading="lazy" />
+      <img src={app.icon} alt="" width="48" height="48" class="rounded-xl bg-elevated" loading="lazy" decoding="async" />
     ) : (
-      <div class="w-12 h-12 rounded-xl bg-elevated flex items-center justify-center text-text-muted text-lg font-bold">
+      <div class="w-12 h-12 rounded-xl bg-elevated flex items-center justify-center text-text-muted text-lg font-bold" aria-hidden="true">
         {app.name.charAt(0)}
       </div>
     )}
@@ -51,7 +51,7 @@ const timeAgo = (() => {
         </svg>
         {formatStars(app.stars)}
       </span>
-      <span>{timeAgo}</span>
+      <time datetime={app.lastUpdated}>{timeAgo}</time>
     </div>
   </div>
 </a>

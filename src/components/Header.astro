@@ -3,7 +3,7 @@ const base = import.meta.env.BASE_URL ?? '/GITHUB_APP_STORE';
 ---
 
 <header class="sticky top-0 z-40 border-b border-border bg-black/80 backdrop-blur-md">
-  <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+  <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-label="Main navigation">
     <div class="flex h-16 items-center justify-between">
       <a href={`${base}/`} class="flex items-center gap-2 text-text-primary font-bold text-lg tracking-tight hover:text-accent-hover transition-colors">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -15,7 +15,7 @@ const base = import.meta.env.BASE_URL ?? '/GITHUB_APP_STORE';
       </a>
 
       <div class="flex items-center gap-4">
-        <a href={`${base}/search`} class="text-text-secondary hover:text-text-primary transition-colors p-2" aria-label="Search apps">
+        <a href={`${base}/search`} class="text-text-secondary hover:text-text-primary transition-colors p-2 rounded-lg focus-visible:ring-2 focus-visible:ring-accent" aria-label="Search apps">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />

@@ -43,12 +43,49 @@ const sortedApps = [...apps].sort((a, b) => b.stars - a.stars);
       </ol>
     </nav>
 
-    <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary">{category.label}</h1>
-    <p class="mt-2 text-text-secondary">{category.description}</p>
-    <p class="mt-1 text-sm text-text-muted">{category.count} app{category.count !== 1 ? 's' : ''}</p>
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary">{category.label}</h1>
+        <p class="mt-2 text-text-secondary">{category.description}</p>
+        <p class="mt-1 text-sm text-text-muted">{category.count} app{category.count !== 1 ? 's' : ''}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <label for="cat-sort" class="text-sm text-text-muted">Sort:</label>
+        <select id="cat-sort" class="rounded-lg border border-border bg-surface text-text-secondary text-sm px-3 py-1.5 focus:border-accent focus:outline-none">
+          <option value="stars">Stars</option>
+          <option value="name">Name (A-Z)</option>
+          <option value="updated">Recently Updated</option>
+          <option value="added">Recently Added</option>
+        </select>
+      </div>
+    </div>
 
-    <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {sortedApps.map((app) => <AppCard app={app} />)}
+    <div id="cat-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {sortedApps.map((app) => (
+        <div class="cat-item" data-name={app.name.toLowerCase()} data-stars={app.stars} data-updated={app.lastUpdated} data-added={app.addedAt}>
+          <AppCard app={app} />
+        </div>
+      ))}
     </div>
   </section>
 </Base>
+
+<script>
+  const grid = document.getElementById('cat-grid');
+  const sortSelect = document.getElementById('cat-sort') as HTMLSelectElement | null;
+  if (grid && sortSelect) {
+    const items = Array.from(grid.querySelectorAll('.cat-item')) as HTMLElement[];
+    sortSelect.addEventListener('change', () => {
+      const sorted = [...items].sort((a, b) => {
+        switch (sortSelect.value) {
+          case 'stars': return Number(b.dataset.stars) - Number(a.dataset.stars);
+          case 'name': return a.dataset.name!.localeCompare(b.dataset.name!);
+          case 'updated': return new Date(b.dataset.updated!).getTime() - new Date(a.dataset.updated!).getTime();
+          case 'added': return new Date(b.dataset.added!).getTime() - new Date(a.dataset.added!).getTime();
+          default: return 0;
+        }
+      });
+      for (const el of sorted) grid.appendChild(el);
+    });
+  }
+</script>
