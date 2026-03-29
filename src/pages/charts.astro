@@ -1,13 +1,34 @@
 ---
 import Base from '../layouts/Base.astro';
-import CategoryBadge from '../components/CategoryBadge.astro';
 import type { AppEntry, CategoryEntry } from '../types/app';
 
 const apps: AppEntry[] = await import('../data/apps.json').then((m) => m.default as unknown as AppEntry[]);
 const categories: CategoryEntry[] = await import('../data/categories.json').then((m) => m.default as unknown as CategoryEntry[]);
 const base = import.meta.env.BASE_URL ?? '/GITHUB_APP_STORE';
 
-// Top 10 by stars (overall ranking)
+// Category icons map
+const categoryIcons: Record<string, string> = {
+  tools: 'M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z',
+  media: 'M9 18V5l12-2v13M9 18a3 3 0 11-6 0 3 3 0 016 0zm12-2a3 3 0 11-6 0 3 3 0 016 0z',
+  security: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',
+  customization: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z',
+  communication: 'M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z',
+  navigation: 'M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z M12 7a3 3 0 110 6 3 3 0 010-6z',
+  reading: 'M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z',
+  games: 'M6 12h4m-2-2v4m6 0h.01M18 12h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z',
+  browser: 'M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 0a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10zM2 12h20',
+  finance: 'M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6',
+  education: 'M22 10v6M2 10l10-5 10 5-10 5z M6 12v5c3 3 8 3 12 0v-5',
+  weather: 'M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z',
+  development: 'M16 18l6-6-6-6M8 6l-6 6 6 6',
+  health: 'M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z',
+  photography: 'M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z M12 17a4 4 0 110-8 4 4 0 010 8z',
+  productivity: 'M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11',
+  social: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 110-8 4 4 0 010 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75',
+  unknown: 'M12 22a10 10 0 110-20 10 10 0 010 20zM9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01',
+};
+
+// Top 10 by stars
 const topByStars = apps.slice(0, 10);
 
 // Top 10 most recently updated
@@ -20,11 +41,10 @@ const topByAdded = [...apps]
   .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
   .slice(0, 10);
 
-// Top 10 trending: recently updated + high stars combo
+// Top 10 trending
 const topTrending = [...apps]
   .map((app) => {
     const daysSinceUpdate = (Date.now() - new Date(app.lastUpdated).getTime()) / (1000 * 60 * 60 * 24);
-    // Score: stars weighted heavily, recency bonus
     const score = app.stars * (1 / (1 + daysSinceUpdate / 30));
     return { app, score };
   })
@@ -32,30 +52,12 @@ const topTrending = [...apps]
   .slice(0, 10)
   .map((e) => e.app);
 
-// Determine rank changes by comparing star-rank with added-date order
-// Apps that were added more recently but rank high = "new"
-// We simulate rank changes: compare current star position vs position 7 days ago (approximated)
-function getRankIndicator(app: AppEntry, currentRank: number): { type: 'up' | 'down' | 'new' | 'same'; diff: number } {
+function getRankIndicator(app: AppEntry): { type: 'up' | 'down' | 'new' | 'same'; diff: number } {
   const addedDaysAgo = (Date.now() - new Date(app.addedAt).getTime()) / (1000 * 60 * 60 * 24);
   const updatedDaysAgo = (Date.now() - new Date(app.lastUpdated).getTime()) / (1000 * 60 * 60 * 24);
-
-  // App added within last 14 days = NEW
-  if (addedDaysAgo < 14) {
-    return { type: 'new', diff: 0 };
-  }
-
-  // App updated recently = likely moving up
-  if (updatedDaysAgo < 7) {
-    const boost = Math.min(3, Math.ceil(app.stars / 5000));
-    return { type: 'up', diff: boost };
-  }
-
-  // App not updated in 90+ days = likely sliding down
-  if (updatedDaysAgo > 90) {
-    const drop = Math.min(3, Math.ceil(updatedDaysAgo / 120));
-    return { type: 'down', diff: drop };
-  }
-
+  if (addedDaysAgo < 14) return { type: 'new', diff: 0 };
+  if (updatedDaysAgo < 7) return { type: 'up', diff: Math.min(3, Math.ceil(app.stars / 5000)) };
+  if (updatedDaysAgo > 90) return { type: 'down', diff: Math.min(3, Math.ceil(updatedDaysAgo / 120)) };
   return { type: 'same', diff: 0 };
 }
 
@@ -73,6 +75,14 @@ function timeAgo(dateStr: string): string {
   if (days < 365) return `${Math.floor(days / 30)}mo ago`;
   return `${Math.floor(days / 365)}y ago`;
 }
+
+// Chart data sets
+const charts = [
+  { id: 'popular', label: 'Most Popular', apps: topByStars, timeField: 'lastUpdated' as const, timePrefix: '' },
+  { id: 'trending', label: 'Trending', apps: topTrending, timeField: 'lastUpdated' as const, timePrefix: '' },
+  { id: 'newest', label: 'Newest', apps: topByAdded, timeField: 'addedAt' as const, timePrefix: 'Added ' },
+  { id: 'updated', label: 'Recently Updated', apps: topByUpdated, timeField: 'lastUpdated' as const, timePrefix: '' },
+];
 ---
 
 <Base
@@ -95,246 +105,123 @@ function timeAgo(dateStr: string): string {
 
     <!-- Chart tabs -->
     <div class="flex flex-wrap gap-2 mb-8" role="tablist" aria-label="Chart types">
-      <button type="button" role="tab" aria-selected="true" data-chart="popular" class="chart-tab active rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:border-accent-hover transition-colors">
-        Most Popular
-      </button>
-      <button type="button" role="tab" aria-selected="false" data-chart="trending" class="chart-tab rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:border-accent-hover transition-colors">
-        Trending
-      </button>
-      <button type="button" role="tab" aria-selected="false" data-chart="newest" class="chart-tab rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:border-accent-hover transition-colors">
-        Newest
-      </button>
-      <button type="button" role="tab" aria-selected="false" data-chart="updated" class="chart-tab rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:border-accent-hover transition-colors">
-        Recently Updated
-      </button>
+      {charts.map((chart, ci) => (
+        <button
+          type="button"
+          role="tab"
+          aria-selected={ci === 0 ? 'true' : 'false'}
+          data-chart={chart.id}
+          class:list={['chart-tab rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary hover:border-accent-hover transition-colors', ci === 0 && 'active']}
+        >
+          {chart.label}
+        </button>
+      ))}
     </div>
 
-    <!-- Popular chart -->
-    <div id="chart-popular" class="chart-panel" role="tabpanel">
-      <ol class="space-y-3" aria-label="Most popular apps">
-        {topByStars.map((app, i) => {
-          const rank = getRankIndicator(app, i);
-          return (
-            <li>
-              <a href={`${base}/apps/${app.id}`} class="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 hover:border-accent-hover hover:bg-elevated transition-all group">
-                <!-- Rank number -->
-                <div class="flex-shrink-0 w-8 text-center">
-                  <span class="text-lg font-bold text-text-muted">#{i + 1}</span>
-                </div>
+    <!-- Chart panels -->
+    {charts.map((chart, ci) => (
+      <div id={`chart-${chart.id}`} class:list={['chart-panel', ci !== 0 && 'hidden']} role="tabpanel">
+        <ol class="space-y-3" aria-label={`${chart.label} apps`}>
+          {chart.apps.map((app, i) => {
+            const rank = chart.id === 'newest'
+              ? { type: 'new' as const, diff: 0 }
+              : getRankIndicator(app);
+            const catLabel = app.category.charAt(0).toUpperCase() + app.category.slice(1);
+            const dateStr = chart.timeField === 'addedAt' ? app.addedAt : app.lastUpdated;
+            const daysAgo = Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
+            const starsStr = formatStars(app.stars);
 
-                <!-- Rank change indicator -->
-                <div class="flex-shrink-0 w-10 text-center">
-                  {rank.type === 'up' && (
-                    <span class="inline-flex flex-col items-center text-success" title={`Up ${rank.diff}`}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M12 4l-8 8h5v8h6v-8h5z" />
-                      </svg>
-                      <span class="text-xs font-bold">{rank.diff}</span>
+            return (
+              <li>
+                <a href={`${base}/apps/${app.id}`} class="group flex items-center gap-3 sm:gap-4 rounded-xl border border-border bg-surface p-3 sm:p-4 hover:border-accent-hover hover:bg-elevated transition-all" aria-label={`#${i + 1} ${app.name} by ${app.author}`}>
+                  {/* Rank */}
+                  <div class="flex-shrink-0 w-7 sm:w-8 text-center">
+                    <span class:list={['font-bold', i < 3 ? 'text-lg text-text-primary' : 'text-base text-text-muted']}>
+                      {i + 1}
                     </span>
-                  )}
-                  {rank.type === 'down' && (
-                    <span class="inline-flex flex-col items-center text-danger" title={`Down ${rank.diff}`}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M12 20l8-8h-5V4H9v8H4z" />
-                      </svg>
-                      <span class="text-xs font-bold">{rank.diff}</span>
-                    </span>
-                  )}
-                  {rank.type === 'new' && (
-                    <span class="inline-flex items-center justify-center rounded-full bg-success/20 text-success px-2 py-0.5 text-xs font-bold" title="New entry">
-                      NEW
-                    </span>
-                  )}
-                  {rank.type === 'same' && (
-                    <span class="inline-flex items-center text-text-muted" title="No change">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                      </svg>
-                    </span>
-                  )}
-                </div>
-
-                <!-- App icon -->
-                {app.icon ? (
-                  <img src={app.icon} alt="" width="48" height="48" class="rounded-xl bg-elevated flex-shrink-0" loading="lazy" decoding="async" />
-                ) : (
-                  <div class="w-12 h-12 rounded-xl bg-elevated flex items-center justify-center text-text-muted text-lg font-bold flex-shrink-0" aria-hidden="true">
-                    {app.name.charAt(0)}
                   </div>
-                )}
 
-                <!-- App info -->
-                <div class="flex-1 min-w-0">
-                  <h3 class="font-bold text-text-primary truncate group-hover:text-accent-hover transition-colors">{app.name}</h3>
-                  <p class="text-sm text-text-secondary truncate">{app.author}</p>
-                </div>
+                  {/* Arrow indicator */}
+                  <div class="flex-shrink-0 w-8 sm:w-10 text-center">
+                    {rank.type === 'up' && (
+                      <span class="inline-flex flex-col items-center text-success" title={`Up ${rank.diff}`}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-8 8h5v8h6v-8h5z" /></svg>
+                        <span class="text-[10px] font-bold leading-none">{rank.diff}</span>
+                      </span>
+                    )}
+                    {rank.type === 'down' && (
+                      <span class="inline-flex flex-col items-center text-danger" title={`Down ${rank.diff}`}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20l8-8h-5V4H9v8H4z" /></svg>
+                        <span class="text-[10px] font-bold leading-none">{rank.diff}</span>
+                      </span>
+                    )}
+                    {rank.type === 'new' && (
+                      <span class="inline-flex items-center justify-center rounded bg-success/15 text-success px-1.5 py-0.5 text-[10px] font-bold tracking-wide">NEW</span>
+                    )}
+                    {rank.type === 'same' && (
+                      <span class="text-text-muted" title="No change">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="6" y1="12" x2="18" y2="12" /></svg>
+                      </span>
+                    )}
+                  </div>
 
-                <!-- Meta -->
-                <div class="hidden sm:flex items-center gap-4 text-sm text-text-muted flex-shrink-0">
-                  <CategoryBadge category={app.category} />
-                  <span class="flex items-center gap-1" title={`${app.stars} stars`}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  {/* Icon */}
+                  {app.icon ? (
+                    <img src={app.icon} alt="" width="48" height="48" class="rounded-xl bg-elevated flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12" loading="lazy" decoding="async" />
+                  ) : (
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-elevated flex items-center justify-center text-text-muted text-base sm:text-lg font-bold flex-shrink-0" aria-hidden="true">
+                      {app.name.charAt(0)}
+                    </div>
+                  )}
+
+                  {/* Name + Author */}
+                  <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-text-primary truncate group-hover:text-accent-hover transition-colors text-sm sm:text-base">{app.name}</h3>
+                    <p class="text-xs sm:text-sm text-text-secondary truncate">{app.author}</p>
+                  </div>
+
+                  {/* Category pill with icon */}
+                  <span class="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-border bg-elevated px-2.5 py-1 text-xs font-medium text-text-secondary flex-shrink-0">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="text-text-muted">
+                      <path d={categoryIcons[app.category] || categoryIcons.unknown} />
+                    </svg>
+                    {catLabel}
+                  </span>
+
+                  {/* Version */}
+                  <span class="hidden md:inline-flex items-center gap-1 rounded-lg bg-elevated px-2 py-1 text-xs font-mono text-text-secondary flex-shrink-0">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="text-text-muted">
+                      <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
+                      <line x1="7" y1="7" x2="7.01" y2="7" />
+                    </svg>
+                    {app.version}
+                  </span>
+
+                  {/* Stars */}
+                  <span class="hidden lg:inline-flex items-center gap-1 text-xs text-text-muted flex-shrink-0" title={`${app.stars} stars`}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="text-warning">
                       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                     </svg>
-                    {formatStars(app.stars)}
+                    {starsStr}
                   </span>
-                  <time datetime={app.lastUpdated} class="text-xs">{timeAgo(app.lastUpdated)}</time>
-                </div>
-              </a>
-            </li>
-          );
-        })}
-      </ol>
-    </div>
 
-    <!-- Trending chart -->
-    <div id="chart-trending" class="chart-panel hidden" role="tabpanel">
-      <ol class="space-y-3" aria-label="Trending apps">
-        {topTrending.map((app, i) => {
-          const rank = getRankIndicator(app, i);
-          return (
-            <li>
-              <a href={`${base}/apps/${app.id}`} class="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 hover:border-accent-hover hover:bg-elevated transition-all group">
-                <div class="flex-shrink-0 w-8 text-center">
-                  <span class="text-lg font-bold text-text-muted">#{i + 1}</span>
-                </div>
-                <div class="flex-shrink-0 w-10 text-center">
-                  {rank.type === 'up' && (
-                    <span class="inline-flex flex-col items-center text-success" title={`Up ${rank.diff}`}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-8 8h5v8h6v-8h5z" /></svg>
-                      <span class="text-xs font-bold">{rank.diff}</span>
-                    </span>
-                  )}
-                  {rank.type === 'down' && (
-                    <span class="inline-flex flex-col items-center text-danger" title={`Down ${rank.diff}`}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20l8-8h-5V4H9v8H4z" /></svg>
-                      <span class="text-xs font-bold">{rank.diff}</span>
-                    </span>
-                  )}
-                  {rank.type === 'new' && (
-                    <span class="inline-flex items-center justify-center rounded-full bg-success/20 text-success px-2 py-0.5 text-xs font-bold" title="New entry">NEW</span>
-                  )}
-                  {rank.type === 'same' && (
-                    <span class="inline-flex items-center text-text-muted" title="No change">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                    </span>
-                  )}
-                </div>
-                {app.icon ? (
-                  <img src={app.icon} alt="" width="48" height="48" class="rounded-xl bg-elevated flex-shrink-0" loading="lazy" decoding="async" />
-                ) : (
-                  <div class="w-12 h-12 rounded-xl bg-elevated flex items-center justify-center text-text-muted text-lg font-bold flex-shrink-0" aria-hidden="true">{app.name.charAt(0)}</div>
-                )}
-                <div class="flex-1 min-w-0">
-                  <h3 class="font-bold text-text-primary truncate group-hover:text-accent-hover transition-colors">{app.name}</h3>
-                  <p class="text-sm text-text-secondary truncate">{app.author}</p>
-                </div>
-                <div class="hidden sm:flex items-center gap-4 text-sm text-text-muted flex-shrink-0">
-                  <CategoryBadge category={app.category} />
-                  <span class="flex items-center gap-1" title={`${app.stars} stars`}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                    {formatStars(app.stars)}
+                  {/* Update time */}
+                  <span class="flex items-center gap-1 text-xs flex-shrink-0">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class={daysAgo < 7 ? 'text-success' : 'text-text-muted'}>
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <time datetime={dateStr} class={daysAgo < 7 ? 'text-success font-medium' : 'text-text-muted'}>
+                      {chart.timePrefix}{timeAgo(dateStr)}
+                    </time>
                   </span>
-                  <time datetime={app.lastUpdated} class="text-xs">{timeAgo(app.lastUpdated)}</time>
-                </div>
-              </a>
-            </li>
-          );
-        })}
-      </ol>
-    </div>
-
-    <!-- Newest chart -->
-    <div id="chart-newest" class="chart-panel hidden" role="tabpanel">
-      <ol class="space-y-3" aria-label="Newest apps">
-        {topByAdded.map((app, i) => (
-          <li>
-            <a href={`${base}/apps/${app.id}`} class="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 hover:border-accent-hover hover:bg-elevated transition-all group">
-              <div class="flex-shrink-0 w-8 text-center">
-                <span class="text-lg font-bold text-text-muted">#{i + 1}</span>
-              </div>
-              <div class="flex-shrink-0 w-10 text-center">
-                <span class="inline-flex items-center justify-center rounded-full bg-success/20 text-success px-2 py-0.5 text-xs font-bold" title="New entry">NEW</span>
-              </div>
-              {app.icon ? (
-                <img src={app.icon} alt="" width="48" height="48" class="rounded-xl bg-elevated flex-shrink-0" loading="lazy" decoding="async" />
-              ) : (
-                <div class="w-12 h-12 rounded-xl bg-elevated flex items-center justify-center text-text-muted text-lg font-bold flex-shrink-0" aria-hidden="true">{app.name.charAt(0)}</div>
-              )}
-              <div class="flex-1 min-w-0">
-                <h3 class="font-bold text-text-primary truncate group-hover:text-accent-hover transition-colors">{app.name}</h3>
-                <p class="text-sm text-text-secondary truncate">{app.author}</p>
-              </div>
-              <div class="hidden sm:flex items-center gap-4 text-sm text-text-muted flex-shrink-0">
-                <CategoryBadge category={app.category} />
-                <span class="flex items-center gap-1" title={`${app.stars} stars`}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                  {formatStars(app.stars)}
-                </span>
-                <time datetime={app.addedAt} class="text-xs">Added {timeAgo(app.addedAt)}</time>
-              </div>
-            </a>
-          </li>
-        ))}
-      </ol>
-    </div>
-
-    <!-- Updated chart -->
-    <div id="chart-updated" class="chart-panel hidden" role="tabpanel">
-      <ol class="space-y-3" aria-label="Recently updated apps">
-        {topByUpdated.map((app, i) => {
-          const rank = getRankIndicator(app, i);
-          return (
-            <li>
-              <a href={`${base}/apps/${app.id}`} class="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 hover:border-accent-hover hover:bg-elevated transition-all group">
-                <div class="flex-shrink-0 w-8 text-center">
-                  <span class="text-lg font-bold text-text-muted">#{i + 1}</span>
-                </div>
-                <div class="flex-shrink-0 w-10 text-center">
-                  {rank.type === 'up' && (
-                    <span class="inline-flex flex-col items-center text-success" title={`Up ${rank.diff}`}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 4l-8 8h5v8h6v-8h5z" /></svg>
-                      <span class="text-xs font-bold">{rank.diff}</span>
-                    </span>
-                  )}
-                  {rank.type === 'down' && (
-                    <span class="inline-flex flex-col items-center text-danger" title={`Down ${rank.diff}`}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 20l8-8h-5V4H9v8H4z" /></svg>
-                      <span class="text-xs font-bold">{rank.diff}</span>
-                    </span>
-                  )}
-                  {rank.type === 'new' && (
-                    <span class="inline-flex items-center justify-center rounded-full bg-success/20 text-success px-2 py-0.5 text-xs font-bold" title="New entry">NEW</span>
-                  )}
-                  {rank.type === 'same' && (
-                    <span class="inline-flex items-center text-text-muted" title="No change">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                    </span>
-                  )}
-                </div>
-                {app.icon ? (
-                  <img src={app.icon} alt="" width="48" height="48" class="rounded-xl bg-elevated flex-shrink-0" loading="lazy" decoding="async" />
-                ) : (
-                  <div class="w-12 h-12 rounded-xl bg-elevated flex items-center justify-center text-text-muted text-lg font-bold flex-shrink-0" aria-hidden="true">{app.name.charAt(0)}</div>
-                )}
-                <div class="flex-1 min-w-0">
-                  <h3 class="font-bold text-text-primary truncate group-hover:text-accent-hover transition-colors">{app.name}</h3>
-                  <p class="text-sm text-text-secondary truncate">{app.author}</p>
-                </div>
-                <div class="hidden sm:flex items-center gap-4 text-sm text-text-muted flex-shrink-0">
-                  <CategoryBadge category={app.category} />
-                  <span class="flex items-center gap-1" title={`${app.stars} stars`}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                    {formatStars(app.stars)}
-                  </span>
-                  <time datetime={app.lastUpdated} class="text-xs">{timeAgo(app.lastUpdated)}</time>
-                </div>
-              </a>
-            </li>
-          );
-        })}
-      </ol>
-    </div>
+                </a>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    ))}
   </section>
 </Base>
 
@@ -353,19 +240,13 @@ function timeAgo(dateStr: string): string {
   for (const tab of tabs) {
     tab.addEventListener('click', () => {
       const chartId = tab.dataset.chart;
-
-      // Update tabs
       for (const t of tabs) {
         t.classList.remove('active');
         t.setAttribute('aria-selected', 'false');
       }
       tab.classList.add('active');
       tab.setAttribute('aria-selected', 'true');
-
-      // Update panels
-      for (const panel of panels) {
-        panel.classList.add('hidden');
-      }
+      for (const panel of panels) panel.classList.add('hidden');
       document.getElementById(`chart-${chartId}`)?.classList.remove('hidden');
     });
   }
