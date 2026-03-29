@@ -116,8 +116,66 @@ const jsonLd = {
         Top Charts
       </a>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-      {latestUpdated.map((app) => <AppCard app={app} />)}
+    <div class="space-y-3">
+      {latestUpdated.map((app) => {
+        const catLabel = app.category.charAt(0).toUpperCase() + app.category.slice(1);
+        const updatedDate = new Date(app.lastUpdated);
+        const daysAgo = Math.floor((Date.now() - updatedDate.getTime()) / (1000 * 60 * 60 * 24));
+        const timeAgo = daysAgo < 1 ? 'today' : daysAgo === 1 ? '1 day ago' : daysAgo < 30 ? `${daysAgo} days ago` : `${Math.floor(daysAgo / 30)} months ago`;
+        const starsFormatted = app.stars >= 1000 ? `${(app.stars / 1000).toFixed(1)}k` : String(app.stars);
+        return (
+          <a href={`${base}/apps/${app.id}`} class="group flex items-center gap-4 rounded-xl border border-border bg-surface p-4 hover:border-accent-hover hover:bg-elevated transition-all" aria-label={`${app.name} by ${app.author}`}>
+            {/* Icon */}
+            {app.icon ? (
+              <img src={app.icon} alt="" width="48" height="48" class="rounded-xl bg-elevated flex-shrink-0" loading="lazy" decoding="async" />
+            ) : (
+              <div class="w-12 h-12 rounded-xl bg-elevated flex items-center justify-center text-text-muted text-lg font-bold flex-shrink-0" aria-hidden="true">
+                {app.name.charAt(0)}
+              </div>
+            )}
+
+            {/* Name + Author */}
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-text-primary truncate group-hover:text-accent-hover transition-colors">{app.name}</h3>
+              <p class="text-sm text-text-secondary truncate">{app.author}</p>
+            </div>
+
+            {/* Category pill */}
+            <span class="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-border bg-elevated px-3 py-1 text-xs font-medium text-text-secondary flex-shrink-0">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="text-text-muted">
+                <path d={categoryIcons[app.category] || categoryIcons.unknown} />
+              </svg>
+              {catLabel}
+            </span>
+
+            {/* Version */}
+            <span class="hidden md:inline-flex items-center gap-1 rounded-lg bg-elevated px-2.5 py-1 text-xs font-mono text-text-secondary flex-shrink-0">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="text-text-muted">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
+                <line x1="7" y1="7" x2="7.01" y2="7" />
+              </svg>
+              {app.version}
+            </span>
+
+            {/* Stars */}
+            <span class="hidden lg:inline-flex items-center gap-1 text-xs text-text-muted flex-shrink-0" title={`${app.stars} stars`}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="text-warning">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              {starsFormatted}
+            </span>
+
+            {/* Update time */}
+            <span class="flex items-center gap-1.5 text-xs flex-shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="text-success">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <time datetime={app.lastUpdated} class={daysAgo < 7 ? 'text-success font-medium' : 'text-text-muted'}>{timeAgo}</time>
+            </span>
+          </a>
+        );
+      })}
     </div>
   </section>
 
