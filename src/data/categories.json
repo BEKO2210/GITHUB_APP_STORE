@@ -2,19 +2,19 @@
   {
     "slug": "media",
     "label": "Media",
-    "count": 185,
+    "count": 186,
     "description": "Media players, music, and video apps"
   },
   {
     "slug": "security",
     "label": "Security",
-    "count": 145,
+    "count": 147,
     "description": "Password managers and security tools"
   },
   {
     "slug": "tools",
     "label": "Tools",
-    "count": 129,
+    "count": 130,
     "description": "Utility and productivity apps"
   },
   {
@@ -32,7 +32,7 @@
   {
     "slug": "navigation",
     "label": "Navigation",
-    "count": 54,
+    "count": 55,
     "description": "Maps and navigation apps"
   },
   {
