@@ -2,7 +2,6 @@
 import Base from '../layouts/Base.astro';
 import AppCard from '../components/AppCard.astro';
 import StatsBanner from '../components/StatsBanner.astro';
-import SearchBar from '../components/SearchBar.astro';
 import PWAPrompt from '../components/PWAPrompt.astro';
 import type { AppEntry, StoreMeta, CategoryEntry } from '../types/app';
 
@@ -13,8 +12,10 @@ const meta: StoreMeta = await import('../data/meta.json').then((m) => m.default 
 const categories: CategoryEntry[] = await import('../data/categories.json').then((m) => m.default as unknown as CategoryEntry[]);
 const base = import.meta.env.BASE_URL ?? '/GITHUB_APP_STORE';
 
-const topApps = apps.slice(0, 12);
-const recentApps = [...apps].sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()).slice(0, 8);
+// 10 most recently updated apps
+const latestUpdated = [...apps]
+  .sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime())
+  .slice(0, 10);
 
 // Category icons map (inline SVG path data)
 const categoryIcons: Record<string, string> = {
@@ -102,25 +103,21 @@ const jsonLd = {
     </div>
   </section>
 
-  <!-- Top Apps -->
+  <!-- Recently Updated (10 newest) -->
   <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
     <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-bold tracking-tight text-text-primary">Top Apps</h2>
-      <a href={`${base}/search`} class="text-sm text-text-secondary hover:text-text-primary transition-colors">View all</a>
+      <h2 class="text-xl font-bold tracking-tight text-text-primary">Recently Updated</h2>
+      <a href={`${base}/charts`} class="text-sm text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="20" x2="18" y2="10" />
+          <line x1="12" y1="20" x2="12" y2="4" />
+          <line x1="6" y1="20" x2="6" y2="14" />
+        </svg>
+        Top Charts
+      </a>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {topApps.map((app) => <AppCard app={app} />)}
-    </div>
-  </section>
-
-  <!-- Recent -->
-  <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-bold tracking-tight text-text-primary">Recently Added</h2>
-      <a href={`${base}/search`} class="text-sm text-text-secondary hover:text-text-primary transition-colors">View all</a>
-    </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {recentApps.map((app) => <AppCard app={app} />)}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      {latestUpdated.map((app) => <AppCard app={app} />)}
     </div>
   </section>
 
