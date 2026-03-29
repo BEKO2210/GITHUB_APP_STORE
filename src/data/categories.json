@@ -1,86 +1,110 @@
 [
   {
-    "slug": "tools",
-    "label": "Tools",
-    "count": 600,
-    "description": "Utility and productivity apps"
-  },
-  {
     "slug": "media",
     "label": "Media",
-    "count": 154,
+    "count": 185,
     "description": "Media players, music, and video apps"
   },
   {
     "slug": "security",
     "label": "Security",
-    "count": 73,
+    "count": 145,
     "description": "Password managers and security tools"
   },
   {
-    "slug": "customization",
-    "label": "Customization",
-    "count": 48,
-    "description": "Launchers, themes, and customization"
-  },
-  {
-    "slug": "communication",
-    "label": "Communication",
-    "count": 42,
-    "description": "Messaging, email, and social apps"
-  },
-  {
-    "slug": "navigation",
-    "label": "Navigation",
-    "count": 36,
-    "description": "Maps and navigation apps"
+    "slug": "tools",
+    "label": "Tools",
+    "count": 129,
+    "description": "Utility and productivity apps"
   },
   {
     "slug": "reading",
     "label": "Reading",
-    "count": 33,
+    "count": 66,
     "description": "E-book readers, RSS, and news apps"
+  },
+  {
+    "slug": "customization",
+    "label": "Customization",
+    "count": 59,
+    "description": "Launchers, themes, and customization"
+  },
+  {
+    "slug": "navigation",
+    "label": "Navigation",
+    "count": 54,
+    "description": "Maps and navigation apps"
+  },
+  {
+    "slug": "communication",
+    "label": "Communication",
+    "count": 49,
+    "description": "Messaging, email, and social apps"
   },
   {
     "slug": "games",
     "label": "Games",
-    "count": 26,
+    "count": 48,
     "description": "Games and entertainment"
+  },
+  {
+    "slug": "photography",
+    "label": "Photography",
+    "count": 41,
+    "description": "Camera, photo editing, and gallery apps"
+  },
+  {
+    "slug": "productivity",
+    "label": "Productivity",
+    "count": 28,
+    "description": "Task management, office, and productivity apps"
   },
   {
     "slug": "browser",
     "label": "Browser",
-    "count": 9,
+    "count": 20,
     "description": "Web browsers and related apps"
+  },
+  {
+    "slug": "development",
+    "label": "Development",
+    "count": 18,
+    "description": "Developer tools and IDEs"
+  },
+  {
+    "slug": "social",
+    "label": "Social",
+    "count": 17,
+    "description": "Social networking and community apps"
   },
   {
     "slug": "finance",
     "label": "Finance",
-    "count": 9,
+    "count": 17,
     "description": "Finance and budgeting apps"
   },
   {
     "slug": "education",
     "label": "Education",
-    "count": 7,
+    "count": 16,
     "description": "Learning and education apps"
   },
   {
     "slug": "weather",
     "label": "Weather",
-    "count": 7,
+    "count": 15,
     "description": "Weather forecast apps"
-  },
-  {
-    "slug": "development",
-    "label": "Development",
-    "count": 7,
-    "description": "Developer tools and IDEs"
   },
   {
     "slug": "health",
     "label": "Health",
-    "count": 3,
+    "count": 11,
     "description": "Health and fitness apps"
+  },
+  {
+    "slug": "unknown",
+    "label": "Unknown",
+    "count": 593,
+    "description": "Uncategorized apps"
   }
 ]
